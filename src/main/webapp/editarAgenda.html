@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Agendamento</title>
+    <style>
+        /* (Use o mesmo CSS das outras páginas) */
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 20px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        h2 { color: #333; border-bottom: 2px solid #5C007C; padding-bottom: 10px; }
+        input[type="text"], input[type="datetime-local"] { width: 95%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; }
+        button { background-color: #5C007C; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px; font-size: 16px; }
+        .cancelar { background-color: #aaa; margin-left: 10px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>✏️ Editar Agendamento <span id="evento-id-titulo"></span></h2>
+    <p><a href="agenda.html">Voltar para a Agenda</a></p>
+
+    <form id="edicaoAgendaForm">
+        <input type="hidden" id="id" name="id">
+
+        <label for="titulo">Título do Evento:</label>
+        <input type="text" id="titulo" name="titulo" required>
+
+        <label for="dataHora">Data e Hora:</label>
+        <input type="datetime-local" id="dataHora" name="dataHora" required>
+
+        <label for="local">Local:</label>
+        <input type="text" id="local" name="local" required>
+
+        <button type="submit">Salvar Alterações</button>
+        <button type="button" class="cancelar" onclick="window.location.href='agenda.html'">Cancelar</button>
+        <p id="feedback" style="margin-top: 15px;"></p>
+    </form>
+</div>
+
+<script>
+    const API_AGENDA_URL = 'api/agenda';
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const eventoId = urlParams.get('id');
+
+        if (eventoId) {
+            document.getElementById('evento-id-titulo').textContent = `(ID: ${eventoId})`;
+            carregarDadosEvento(eventoId);
+        } else {
+            document.getElementById('feedback').textContent = "Erro: ID do evento não fornecido.";
+        }
+    });
+
+    function carregarDadosEvento(id) {
+        fetch(`${API_AGENDA_URL}?id=${id}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Falha ao buscar evento.');
+                return response.json();
+            })
+            .then(data => {
+                if (data.length === 0) throw new Error('Evento não encontrado.');
+                const evento = data[0];
+
+                document.getElementById('id').value = evento.id;
+                document.getElementById('titulo').value = evento.titulo;
+                document.getElementById('local').value = evento.local;
+
+                const dataHoraFormatada = evento.dataHora.substring(0, 16);
+                document.getElementById('dataHora').value = dataHoraFormatada;
+            })
+            .catch(error => {
+                document.getElementById('feedback').textContent = `❌ ${error.message}`;
+                console.error('Erro de carregamento:', error);
+            });
+    }
+
+    document.getElementById('edicaoAgendaForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const form = event.target;
+        const feedback = document.getElementById('feedback');
+
+        const eventoData = {
+            id: parseInt(form.id.value),
+            titulo: form.titulo.value,
+            dataHora: form.dataHora.value,
+            local: form.local.value
+        };
+
+        fetch(API_AGENDA_URL, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(eventoData)
+        })
+        .then(response => {
+            // if (verificarLogin(response)) throw new Error('Auth failed');
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Falha no Servidor ao salvar.');
+            }
+        })
+        .then(data => {
+            feedback.textContent = `✅ Evento ID ${data.id} atualizado com sucesso!`;
+            feedback.style.color = 'green';
+
+            setTimeout(() => {
+                window.location.href = 'agenda.html';
+            }, 1500);
+        })
+        .catch(error => {
+            feedback.textContent = `❌ Erro de Atualização: ${error.message}`;
+            feedback.style.color = 'red';
+            console.error('Erro de PUT:', error);
+        });
+    });
+</script>
+</body>
+</html>

@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
 import java.util.List;
+import java.util.Optional;
 
 public class ApresentacaoDAO {
 
@@ -39,5 +40,58 @@ public class ApresentacaoDAO {
             em.close();
         }
         return apresentacoes;
+    }
+
+    public void deletar(int id) {
+        EntityManager em = emf.createEntityManager();
+        em.getTransaction().begin();
+
+        try {
+            Apresentacao apresentacao = em.find(Apresentacao.class, id);
+
+            if (apresentacao != null) {
+                em.remove(apresentacao);
+                em.getTransaction().commit();
+                System.out.println("✅ Apresentação ID " + id + " deletada com sucesso.");
+            } else {
+                System.out.println("⚠️ Apresentação ID " + id + " não encontrada para deleção.");
+                em.getTransaction().rollback();
+            }
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            System.err.println("❌ Erro ao deletar apresentação ID " + id + ": " + e.getMessage());
+
+            throw new RuntimeException("Erro de persistência ao deletar", e);
+        } finally {
+            em.close();
+        }
+    }
+
+    public Optional<Apresentacao> buscarPorId(int id) {
+        EntityManager em = emf.createEntityManager();
+        Apresentacao apresentacao = em.find(Apresentacao.class, id);
+        em.close();
+        return Optional.ofNullable(apresentacao);
+    }
+
+    public void atualizar(Apresentacao apresentacao) {
+        EntityManager em = emf.createEntityManager();
+        em.getTransaction().begin();
+
+        try {
+            em.merge(apresentacao);
+            em.getTransaction().commit();
+            System.out.println("✅ Apresentação ID " + apresentacao.getId() + " atualizada com sucesso.");
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            System.err.println("❌ Erro ao atualizar apresentação ID " + apresentacao.getId() + ": " + e.getMessage());
+            throw new RuntimeException("Erro de persistência ao atualizar", e);
+        } finally {
+            em.close();
+        }
     }
 }

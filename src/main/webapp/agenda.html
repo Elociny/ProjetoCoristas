@@ -26,6 +26,7 @@
         a {
             color: #5C007C;
             text-decoration: none;
+            margin-right: 15px;
         }
         a:hover {
             text-decoration: underline;
@@ -79,13 +80,22 @@
     document.addEventListener('DOMContentLoaded', carregarAgenda);
     const API_AGENDA_URL = 'api/agenda';
 
+    function verificarLogin(response) {
+        if (response.status === 401) {
+            alert("Sua sessão expirou ou o acesso é negado. Faça login novamente.");
+            window.location.href = 'index.html';
+            return true;
+        }
+        return false;
+    }
+
     function formatarDataHora(dateTimeString) {
         if (!dateTimeString) return { data: 'N/A', hora: 'N/A' };
 
         try {
             const parts = dateTimeString.split('T');
             const dataPart = parts[0];
-            const horaPart = parts[1] ? parts[1].substring(0, 5) : '00:00'; // Pega HH:MM
+            const horaPart = parts[1] ? parts[1].substring(0, 5) : '00:00';
 
             const [ano, mes, dia] = dataPart.split('-');
             const dataFormatada = `${dia}/${mes}/${ano}`;
@@ -106,8 +116,9 @@
         tabelaBody.innerHTML = '';
         statusMsg.textContent = 'Carregando agenda...';
 
-        fetch(API_AGENDA_URL) // Endpoint GET /api/agenda
+        fetch(API_AGENDA_URL)
             .then(response => {
+                if (verificarLogin(response)) { return; }
                 if (!response.ok) {
                     throw new Error('Erro ao carregar agenda. Status: ' + response.status);
                 }
@@ -132,9 +143,9 @@
                         <td>${hora}</td>
                         <td>${evento.local}</td>
                         <td>
-                            <a href="#" onclick="alert('Implementar Edição de Evento.')">Editar</a> |
-                            <a href="#" onclick="alert('Implementar Exclusão de Evento.')">Excluir</a>
-                            </td>
+                            <a href="editarAgenda.html?id=${evento.id}">Editar</a> |
+                            <a href="#" onclick="deletarApresentacao(${evento.id}, '${evento.titulo}')">Excluir</a>
+                        </td>
                     `;
                 });
             })
@@ -142,6 +153,36 @@
                 statusMsg.textContent = `❌ Erro de Fetch: ${error.message}`;
                 console.error('Erro de Fetch:', error);
             });
+    }
+
+    function deletarApresentacao(id, titulo) {
+        if (!confirm(`Tem certeza que deseja excluir a apresentação '${titulo}' (ID: ${id})?`)) {
+            return;
+        }
+
+        fetch(`${API_AGENDA_URL}?id=${id}`, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (verificarLogin(response)) { return; }
+
+            if (response.status === 204) {
+                alert(`✅ Apresentação ID ${id} excluída com sucesso!`);
+                carregarAgenda(); // Recarrega a lista
+            } else if (response.status === 404) {
+                 alert('❌ Erro: Apresentação não encontrada.');
+            } else {
+                 response.json().then(data => {
+                     alert(`❌ Falha ao excluir: ${data.erro || 'Erro no servidor.'}`);
+                 }).catch(() => {
+                     alert(`❌ Erro desconhecido ao excluir (Status: ${response.status}).`);
+                 });
+            }
+        })
+        .catch(error => {
+            alert('❌ Erro de rede ou servidor ao tentar deletar.');
+            console.error('Erro de Delete:', error);
+        });
     }
 </script>
 </body>

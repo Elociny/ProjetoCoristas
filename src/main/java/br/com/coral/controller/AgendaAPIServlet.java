@@ -68,6 +68,65 @@ public class AgendaAPIServlet extends HttpServlet {
         }
     }
 
+    @Override
+    protected void doPut(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        try {
+            String jsonRequest = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+            Apresentacao apresentacaoAtualizada = gson.fromJson(jsonRequest, Apresentacao.class);
+
+            if (apresentacaoAtualizada.getId() == 0) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write(gson.toJson(new ErrorResponse("ID da apresentação ausente na requisição de atualização.")));
+                return;
+            }
+
+            agendaDAO.atualizar(apresentacaoAtualizada);
+
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().write(gson.toJson(apresentacaoAtualizada));
+
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write(gson.toJson(new ErrorResponse("Falha ao atualizar a apresentação: " + e.getMessage())));
+        }
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        String idStr = request.getParameter("id");
+
+        if (idStr == null || idStr.isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST); // 400
+            response.getWriter().write(gson.toJson(new ErrorResponse("ID da apresentação ausente.")));
+            return;
+        }
+
+        try {
+            int id = Integer.parseInt(idStr);
+
+            agendaDAO.deletar(id);
+
+            response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+
+        } catch (NumberFormatException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write(gson.toJson(new ErrorResponse("ID inválido.")));
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write(gson.toJson(new ErrorResponse("Falha ao deletar apresentação: " + e.getMessage())));
+        }
+    }
+
     private static class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
         private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
