@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Corista</title>
+    <style>
+        /* (Use o mesmo CSS das outras páginas) */
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 20px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        h2 { color: #333; border-bottom: 2px solid #5C007C; padding-bottom: 10px; }
+        input[type="text"], input[type="email"] { width: 95%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; }
+        button { background-color: #5C007C; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px; font-size: 16px; }
+        .cancelar { background-color: #aaa; margin-left: 10px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>✏️ Editar Corista <span id="corista-id-titulo"></span></h2>
+    <p><a href="listar.html">Voltar para a Lista</a></p>
+
+    <form id="edicaoForm">
+        <input type="hidden" id="id" name="id">
+
+        <label for="nome">Nome Completo:</label>
+        <input type="text" id="nome" name="nome" required>
+
+        <label for="email">E-mail:</label>
+        <input type="email" id="email" name="email" required>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="temPendencias" name="temPendencias">
+            <label for="temPendencias" style="display: inline;">Possui Pendências Administrativas?</label>
+        </div>
+
+        <label for="faltasNosUltimosDoisEnsaios">Faltas nos Últimos 2 Ensaios:</label>
+        <input type="number" id="faltasNosUltimosDoisEnsaios" name="faltasNosUltimosDoisEnsaios" min="0" required>
+
+        <button type="submit">Salvar Alterações</button>
+        <button type="button" class="cancelar" onclick="window.location.href='listar.html'">Cancelar</button>
+        <p id="feedback" style="margin-top: 15px;"></p>
+    </form>
+</div>
+
+<script>
+    const API_URL = 'api/coristas';
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const coristaId = urlParams.get('id');
+
+        if (coristaId) {
+            document.getElementById('corista-id-titulo').textContent = `(ID: ${coristaId})`;
+            carregarDadosCorista(coristaId);
+        } else {
+            document.getElementById('feedback').textContent = "Erro: ID do corista não fornecido.";
+        }
+    });
+
+    function carregarDadosCorista(id) {
+        fetch(`${API_URL}?id=${id}`) // Reutiliza o endpoint GET /api/coristas
+            .then(response => {
+                if (!response.ok) throw new Error('Falha ao buscar corista.');
+                return response.json();
+            })
+            .then(data => {
+                if (data.length === 0) throw new Error('Corista não encontrado.');
+                const corista = data[0]; // Assume que o primeiro elemento é o correto
+
+                document.getElementById('id').value = corista.id;
+                document.getElementById('nome').value = corista.nome;
+                document.getElementById('email').value = corista.email;
+                document.getElementById('temPendencias').checked = corista.temPendencias;
+                document.getElementById('faltasNosUltimosDoisEnsaios').value = corista.faltasNosUltimosDoisEnsaios;
+            })
+            .catch(error => {
+                document.getElementById('feedback').textContent = `❌ ${error.message}`;
+                console.error('Erro de carregamento:', error);
+            });
+    }
+
+    document.getElementById('edicaoForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const form = event.target;
+        const feedback = document.getElementById('feedback');
+
+        const coristaData = {
+            id: parseInt(form.id.value),
+            nome: form.nome.value,
+            email: form.email.value,
+            temPendencias: form.temPendencias.checked,
+            faltasNosUltimosDoisEnsaios: parseInt(form.faltasNosUltimosDoisEnsaios.value)
+        };
+
+        fetch(API_URL, { // Endpoint PUT para /api/coristas
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(coristaData)
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Falha no Servidor. Verifique os logs.');
+            }
+        })
+        .then(data => {
+            feedback.textContent = `✅ Corista ID ${data.id} atualizado com sucesso!`;
+            feedback.style.color = 'green';
+
+            setTimeout(() => {
+                window.location.href = 'listar.html';
+            }, 1500);
+        })
+        .catch(error => {
+            feedback.textContent = `❌ Erro de Atualização: ${error.message}`;
+            feedback.style.color = 'red';
+            console.error('Erro de PUT:', error);
+        });
+    });
+</script>
+</body>
+</html>

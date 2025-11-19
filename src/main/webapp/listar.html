@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Coristas - Coral</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #5C007C;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        a {
+            color: #5C007C;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #5C007C;
+            color: white;
+        }
+        .pendencia {
+            color: red;
+            font-weight: bold;
+        }
+        .status {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>👥 Coristas Cadastrados</h2>
+    <p><a href="cadastrar.html">➕ Cadastrar Novo Corista</a></p>
+
+    <table id="tabela-coristas">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>E-mail</th>
+            <th>Pendências</th>
+            <th>Faltas (Últimos 2)</th>
+            <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <p id="status-mensagem">Carregando dados...</p>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', carregarCoristas);
+
+    function carregarCoristas() {
+        const tabelaBody = document.querySelector('#tabela-coristas tbody');
+        const statusMsg = document.querySelector('#status-mensagem');
+        tabelaBody.innerHTML = '';
+        statusMsg.textContent = 'Carregando dados...';
+
+        fetch('api/coristas')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro ao carregar lista. Status: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(coristas => {
+                statusMsg.textContent = '';
+
+                if (coristas.length === 0) {
+                    statusMsg.textContent = 'Nenhum corista cadastrado ainda.';
+                    return;
+                }
+
+                coristas.forEach(corista => {
+                    const row = tabelaBody.insertRow();
+
+                    const pendenciaTexto = corista.temPendencias ?
+                        `<span class="pendencia">SIM</span>` :
+                        `<span class="status">Não</span>`;
+
+                    row.innerHTML = `
+                        <td>${corista.id}</td>
+                        <td>${corista.nome}</td>
+                        <td>${corista.email}</td>
+                        <td>${pendenciaTexto}</td>
+                        <td>${corista.faltasNosUltimosDoisEnsaios}</td>
+                        <td>
+                            <a href="editar.html?id=${corista.id}">Editar</a> |
+
+                            <a href="#" onclick="deletarCorista(${corista.id}, '${corista.nome}')">Excluir</a>
+                        </td>
+                    `;
+                });
+            })
+            .catch(error => {
+                statusMsg.textContent = `❌ Erro de Fetch: ${error.message}`;
+                console.error('Erro de Fetch:', error);
+            });
+    }
+
+    function deletarCorista(id, nome) {
+        if (!confirm(`Tem certeza que deseja excluir o corista ${nome} (ID: ${id})?`)) {
+            return; // Usuário cancelou
+        }
+
+        fetch(`api/coristas?id=${id}`, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (response.status === 204) {
+                alert(`✅ Corista ID ${id} excluído com sucesso!`);
+                carregarCoristas();
+            } else if (response.status === 404) {
+                 alert('❌ Erro: Corista não encontrado.');
+            } else {
+                 return response.json().then(data => {
+                     alert(`❌ Falha ao excluir: ${data.erro || 'Erro no servidor.'}`);
+                 }).catch(() => {
+                     alert(`❌ Erro desconhecido ao excluir (Status: ${response.status}).`);
+                 });
+            }
+        })
+        .catch(error => {
+            alert('❌ Erro de rede ou servidor ao tentar deletar.');
+            console.error('Erro de Delete:', error);
+        });
+    }
+</script>
+</body>
+</html>

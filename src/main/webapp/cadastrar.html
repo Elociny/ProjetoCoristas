@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Coristas - Coral</title>
+    <style>
+        /* (Seu CSS está aqui para manter a aparência) */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #5C007C;
+            padding-bottom: 10px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="email"] {
+            width: 95%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .checkbox-group {
+            margin-top: 15px;
+        }
+        button {
+            background-color: #5C007C;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #43005a;
+        }
+        #feedback {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>🎶 Cadastro de Novo Corista</h2>
+    <p><a href="listar.html">Visualizar Lista de Coristas</a></p>
+
+    <form id="cadastroForm">
+
+        <label for="nome">Nome Completo:</label>
+        <input type="text" id="nome" name="nome" required>
+
+        <label for="email">E-mail:</label>
+        <input type="email" id="email" name="email" required>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="pendencias" name="temPendencias">
+            <label for="pendencias" style="display: inline;">Possui Pendências Administrativas?</label>
+        </div>
+
+        <button type="submit">Cadastrar Corista</button>
+        <p id="feedback"></p>
+    </form>
+</div>
+
+<script>
+    document.getElementById('cadastroForm').addEventListener('submit', function(event) {
+        // ESSENCIAL: Impede que o formulário recarregue a página
+        event.preventDefault();
+
+        const form = event.target;
+        const feedback = document.getElementById('feedback');
+
+        // Coletar dados do formulário
+        const coristaData = {
+            nome: form.nome.value,
+            email: form.email.value,
+            // Checkbox: true se marcado, false se não marcado
+            temPendencias: form.temPendencias.checked
+        };
+
+        // 1. Faz a requisição FETCH API
+        fetch('api/coristas', {
+            method: 'POST', // Chama o doPost() do CoristaAPIServlet
+            headers: {
+                'Content-Type': 'application/json' // Informa ao Servlet que o corpo é JSON
+            },
+            body: JSON.stringify(coristaData) // Converte objeto JS em JSON
+        })
+        .then(response => {
+            // Verifica se o status é 201 Created (sucesso)
+            if (response.ok || response.status === 201) {
+                return response.json();
+            } else {
+                // Trata erros do servidor (e.g., falha no banco)
+                throw new Error('Falha ao cadastrar. Verifique a API.');
+            }
+        })
+        .then(data => {
+            // SUCESSO: Exibe modal e limpa o form
+            feedback.textContent = `✅ Corista ${data.nome} cadastrado com ID ${data.id}!`;
+            feedback.style.color = 'green';
+            form.reset();
+
+            // 🌟 MODAL DE CONFIRMAÇÃO E REDIRECIONAMENTO 🌟
+            const confirma = confirm("Cadastro realizado com sucesso! Deseja ir para a página de listagem?");
+
+            if (confirma) {
+                window.location.href = 'listar.html';
+            }
+        })
+        .catch(error => {
+            feedback.textContent = `❌ Erro de Cadastro: ${error.message}`;
+            feedback.style.color = 'red';
+            console.error('Erro de Cadastro:', error);
+        });
+    });
+</script>
+</body>
+</html>

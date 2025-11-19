@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Agenda de Apresentações - Coral</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #5C007C;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        a {
+            color: #5C007C;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #5C007C;
+            color: white;
+        }
+        .data {
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>🗓️ Agenda de Eventos</h2>
+    <p>
+        <a href="agendar.html">➕ Agendar Novo Evento</a> |
+        <a href="listar.html">👥 Voltar para a Lista de Coristas</a>
+    </p>
+
+    <table id="tabela-agenda">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Título</th>
+            <th>Data</th>
+            <th>Hora</th>
+            <th>Local</th>
+            <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <p id="status-mensagem">Carregando agenda...</p>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', carregarAgenda);
+    const API_AGENDA_URL = 'api/agenda';
+
+    function formatarDataHora(dateTimeString) {
+        if (!dateTimeString) return { data: 'N/A', hora: 'N/A' };
+
+        try {
+            const parts = dateTimeString.split('T');
+            const dataPart = parts[0];
+            const horaPart = parts[1] ? parts[1].substring(0, 5) : '00:00'; // Pega HH:MM
+
+            const [ano, mes, dia] = dataPart.split('-');
+            const dataFormatada = `${dia}/${mes}/${ano}`;
+
+            return {
+                data: dataFormatada,
+                hora: horaPart
+            };
+        } catch (e) {
+            console.error("Erro ao formatar data:", e);
+            return { data: 'Inválida', hora: 'Inválida' };
+        }
+    }
+
+    function carregarAgenda() {
+        const tabelaBody = document.querySelector('#tabela-agenda tbody');
+        const statusMsg = document.querySelector('#status-mensagem');
+        tabelaBody.innerHTML = '';
+        statusMsg.textContent = 'Carregando agenda...';
+
+        fetch(API_AGENDA_URL) // Endpoint GET /api/agenda
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro ao carregar agenda. Status: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(eventos => {
+                statusMsg.textContent = '';
+
+                if (eventos.length === 0) {
+                    statusMsg.textContent = 'Nenhum evento agendado ainda.';
+                    return;
+                }
+
+                eventos.forEach(evento => {
+                    const row = tabelaBody.insertRow();
+                    const { data, hora } = formatarDataHora(evento.dataHora);
+
+                    row.innerHTML = `
+                        <td>${evento.id}</td>
+                        <td>${evento.titulo}</td>
+                        <td class="data">${data}</td>
+                        <td>${hora}</td>
+                        <td>${evento.local}</td>
+                        <td>
+                            <a href="#" onclick="alert('Implementar Edição de Evento.')">Editar</a> |
+                            <a href="#" onclick="alert('Implementar Exclusão de Evento.')">Excluir</a>
+                            </td>
+                    `;
+                });
+            })
+            .catch(error => {
+                statusMsg.textContent = `❌ Erro de Fetch: ${error.message}`;
+                console.error('Erro de Fetch:', error);
+            });
+    }
+</script>
+</body>
+</html>

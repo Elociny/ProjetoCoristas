@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro e Validação de Presença</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 20px; }
+        .container { max-width: 1100px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        h2 { color: #333; border-bottom: 2px solid #5C007C; padding-bottom: 10px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #5C007C; color: white; }
+        .apto { color: green; font-weight: bold; }
+        .impedido { color: red; font-weight: bold; }
+        button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 2px;
+            font-size: 14px;
+        }
+        .btn-validar { background-color: #007bff; color: white; }
+        .btn-falta { background-color: #dc3545; color: white; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>✅ Registro e Validação de Presença (RNs)</h2>
+    <p><a href="listar.html">👥 Gerenciar Coristas</a> | <a href="agenda.html">📅 Agenda</a></p>
+
+    <table id="tabela-coristas">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Pendências</th>
+            <th>Faltas (Últimos 2)</th>
+            <th>Status Aptidão</th>
+            <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <p id="status-mensagem">Carregando lista de coristas...</p>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', carregarCoristasParaPresenca);
+
+    const API_CORISTA_URL = 'api/coristas';
+    const API_PRESENCA_URL = 'api/presenca';
+
+    function carregarCoristasParaPresenca() {
+        const tabelaBody = document.querySelector('#tabela-coristas tbody');
+        const statusMsg = document.querySelector('#status-mensagem');
+        tabelaBody.innerHTML = '';
+        statusMsg.textContent = 'Carregando lista de coristas...';
+
+        fetch(API_CORISTA_URL)
+            .then(response => {
+                if (!response.ok) throw new Error('Falha ao carregar coristas.');
+                return response.json();
+            })
+            .then(coristas => {
+                statusMsg.textContent = '';
+                if (coristas.length === 0) {
+                    statusMsg.textContent = 'Nenhum corista cadastrado.';
+                    return;
+                }
+
+                coristas.forEach(corista => {
+                    const row = tabelaBody.insertRow();
+
+                    // Determina o status de pendência visual
+                    const pendenciaTexto = corista.temPendencias ?
+                        `<span class="impedido">SIM</span>` : `Não`;
+
+                    row.innerHTML = `
+                        <td>${corista.id}</td>
+                        <td>${corista.nome}</td>
+                        <td>${pendenciaTexto}</td>
+                        <td>${corista.faltasNosUltimosDoisEnsaios}</td>
+                        <td id="status-${corista.id}">Aguardando...</td>
+                        <td>
+                            <button class="btn-validar" onclick="validarAptidao(${corista.id})">Validar Aptidão (RN)</button>
+                            <button class="btn-falta" onclick="registrarFalta(${corista.id})">Registrar Falta</button>
+                        </td>
+                    `;
+                });
+            })
+            .catch(error => {
+                statusMsg.textContent = `❌ Erro: ${error.message}`;
+                console.error('Erro de Fetch:', error);
+            });
+    }
+
+    function validarAptidao(id) {
+        const statusCell = document.getElementById(`status-${id}`);
+        statusCell.textContent = 'Validando...';
+
+        fetch(`${API_PRESENCA_URL}?coristaId=${id}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Falha na validação do servidor.');
+                return response.json();
+            })
+            .then(data => {
+                const statusClass = data.apto ? 'apto' : 'impedido';
+
+                statusCell.innerHTML = `<span class="${statusClass}">${data.status}</span>`;
+
+                if (data.apto) {
+                    alert(`✅ ${data.status}: Corista ID ${id} pode se apresentar!`);
+                    // Aqui você chamaria o endpoint de registro de presença.
+                } else {
+                    alert(`🛑 ${data.status}: Corista ID ${id} impedido por RNs!`);
+                }
+            })
+            .catch(error => {
+                statusCell.innerHTML = `<span class="impedido">ERRO</span>`;
+                alert(`Erro ao validar: ${error.message}`);
+            });
+    }
+
+    function registrarFalta(id) {
+        if (!confirm(`Tem certeza que deseja registrar uma falta para o Corista ID ${id}?`)) {
+            return;
+        }
+
+        fetch(`${API_PRESENCA_URL}?coristaId=${id}`, {
+            method: 'POST'
+        })
+        .then(response => {
+            if (response.ok) {
+                alert(`Falta registrada com sucesso. A lista será atualizada.`);
+                carregarCoristasParaPresenca(); // Recarrega para mostrar a falta atualizada
+            } else {
+                return response.json().then(data => {
+                    throw new Error(data.erro || 'Falha no servidor ao registrar falta.');
+                });
+            }
+        })
+        .catch(error => {
+            alert(`❌ Erro ao registrar falta: ${error.message}`);
+            console.error('Erro de Falta:', error);
+        });
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema Coristas - Login</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 20px; }
+        .container { max-width: 400px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); text-align: center;}
+        h2 { color: #5C007C; border-bottom: 2px solid #5C007C; padding-bottom: 10px; margin-bottom: 20px;}
+        label { display: block; text-align: left; margin-top: 10px; font-weight: bold; }
+        input[type="text"], input[type="password"] { width: 90%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; }
+        button { background-color: #5C007C; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; margin-top: 15px; font-size: 16px; width: 96%;}
+        #feedback { margin-top: 15px; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>🔒 Efetuar Login</h2>
+    <form id="loginForm">
+
+        <label for="usuario">Usuário:</label>
+        <input type="text" id="usuario" name="usuario" required>
+
+        <label for="senha">Senha:</label>
+        <input type="password" id="senha" name="senha" required>
+
+        <button type="submit">Entrar no Sistema</button>
+        <p id="feedback"></p>
+    </form>
+</div>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const feedback = document.getElementById('feedback');
+
+        const loginData = {
+            usuario: form.usuario.value,
+            senha: form.senha.value
+        };
+
+        feedback.textContent = 'Verificando credenciais...';
+        feedback.style.color = 'black';
+
+        fetch('api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(loginData)
+        })
+        .then(response => {
+            if (response.ok || response.status === 401) {
+                return response.json();
+            }
+            throw new Error('Erro na comunicação. Status: ' + response.status);
+        })
+        .then(data => {
+            if (data.sucesso) {
+                feedback.textContent = data.mensagem + ' Redirecionando...';
+                feedback.style.color = 'green';
+                setTimeout(() => {
+                    window.location.href = 'cadastrar.html'; // Próxima página
+                }, 500);
+            } else {
+                // FALHA DE LOGIN
+                feedback.textContent = '❌ ' + data.mensagem;
+                feedback.style.color = 'red';
+                form.reset();
+            }
+        })
+        .catch(error => {
+            feedback.textContent = '❌ Erro de rede ou servidor: ' + error.message;
+            feedback.style.color = 'red';
+            console.error('Erro de Login:', error);
+        });
+    });
+</script>
+</body>
+</html>

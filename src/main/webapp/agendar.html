@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Agendamento de Apresentação</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 20px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        h2 { color: #333; border-bottom: 2px solid #5C007C; padding-bottom: 10px; margin-bottom: 20px; }
+        label { display: block; margin-top: 10px; font-weight: bold; }
+        input[type="text"], input[type="datetime-local"], input[type="email"] { width: 95%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; }
+        button { background-color: #5C007C; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px; font-size: 16px; }
+        button:hover { background-color: #43005a; }
+        .cancelar { background-color: #aaa; margin-left: 10px; }
+        #feedback { margin-top: 15px; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>📅 Agendar Nova Apresentação/Ensaio</h2>
+    <p><a href="agenda.html">Visualizar Agenda Completa</a></p>
+
+    <form id="agendarForm">
+
+        <label for="titulo">Título do Evento:</label>
+        <input type="text" id="titulo" name="titulo" required>
+
+        <label for="dataHora">Data e Hora:</label>
+        <input type="datetime-local" id="dataHora" name="dataHora" required>
+
+        <label for="local">Local:</label>
+        <input type="text" id="local" name="local" required>
+
+        <button type="submit">Agendar Evento</button>
+        <button type="button" class="cancelar" onclick="window.location.href='agenda.html'">Cancelar</button>
+        <p id="feedback"></p>
+    </form>
+</div>
+
+<script>
+    document.getElementById('agendarForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const feedback = document.getElementById('feedback');
+
+        const eventoData = {
+            titulo: form.titulo.value,
+            // O valor de datetime-local é uma string compatível com LocalDateTime em Java
+            dataHora: form.dataHora.value,
+            local: form.local.value
+        };
+
+        fetch('api/agenda', {
+            method: 'POST', // Chama o doPost() do AgendaAPIServlet
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(eventoData) // Envia o JSON
+        })
+        .then(response => {
+            if (response.ok || response.status === 201) {
+                return response.json();
+            } else {
+                throw new Error('Falha no agendamento. Verifique a API.');
+            }
+        })
+        .then(data => {
+            feedback.textContent = `✅ Evento '${data.titulo}' agendado com sucesso!`;
+            feedback.style.color = 'green';
+            form.reset();
+
+            const confirma = confirm("Agendamento salvo! Deseja ir para a Agenda?");
+            if (confirma) {
+                window.location.href = 'agenda.html';
+            }
+        })
+        .catch(error => {
+            feedback.textContent = `❌ Erro ao agendar: ${error.message}`;
+            feedback.style.color = 'red';
+            console.error('Erro de Agendamento:', error);
+        });
+    });
+</script>
+</body>
+</html>
