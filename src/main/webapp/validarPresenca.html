@@ -73,7 +73,6 @@
                 coristas.forEach(corista => {
                     const row = tabelaBody.insertRow();
 
-                    // Determina o status de pendência visual
                     const pendenciaTexto = corista.temPendencias ?
                         `<span class="impedido">SIM</span>` : `Não`;
 
@@ -112,7 +111,6 @@
 
                 if (data.apto) {
                     alert(`✅ ${data.status}: Corista ID ${id} pode se apresentar!`);
-                    // Aqui você chamaria o endpoint de registro de presença.
                 } else {
                     alert(`🛑 ${data.status}: Corista ID ${id} impedido por RNs!`);
                 }
@@ -134,7 +132,7 @@
         .then(response => {
             if (response.ok) {
                 alert(`Falta registrada com sucesso. A lista será atualizada.`);
-                carregarCoristasParaPresenca(); // Recarrega para mostrar a falta atualizada
+                carregarCoristasParaPresenca();
             } else {
                 return response.json().then(data => {
                     throw new Error(data.erro || 'Falha no servidor ao registrar falta.');

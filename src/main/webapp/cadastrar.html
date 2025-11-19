@@ -82,44 +82,36 @@
 
 <script>
     document.getElementById('cadastroForm').addEventListener('submit', function(event) {
-        // ESSENCIAL: Impede que o formulário recarregue a página
         event.preventDefault();
 
         const form = event.target;
         const feedback = document.getElementById('feedback');
 
-        // Coletar dados do formulário
         const coristaData = {
             nome: form.nome.value,
             email: form.email.value,
-            // Checkbox: true se marcado, false se não marcado
             temPendencias: form.temPendencias.checked
         };
 
-        // 1. Faz a requisição FETCH API
         fetch('api/coristas', {
-            method: 'POST', // Chama o doPost() do CoristaAPIServlet
+            method: 'POST',
             headers: {
-                'Content-Type': 'application/json' // Informa ao Servlet que o corpo é JSON
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify(coristaData) // Converte objeto JS em JSON
+            body: JSON.stringify(coristaData)
         })
         .then(response => {
-            // Verifica se o status é 201 Created (sucesso)
             if (response.ok || response.status === 201) {
                 return response.json();
             } else {
-                // Trata erros do servidor (e.g., falha no banco)
                 throw new Error('Falha ao cadastrar. Verifique a API.');
             }
         })
         .then(data => {
-            // SUCESSO: Exibe modal e limpa o form
             feedback.textContent = `✅ Corista ${data.nome} cadastrado com ID ${data.id}!`;
             feedback.style.color = 'green';
             form.reset();
 
-            // 🌟 MODAL DE CONFIRMAÇÃO E REDIRECIONAMENTO 🌟
             const confirma = confirm("Cadastro realizado com sucesso! Deseja ir para a página de listagem?");
 
             if (confirma) {

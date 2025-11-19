@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -34,12 +35,35 @@ public class AgendaAPIServlet extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
+        String idStr = request.getParameter("id");
+
         try {
-            List<Apresentacao> apresentacoes = agendaDAO.listarTodos();
-            response.getWriter().write(gson.toJson(apresentacoes));
+            String apresentacoesJson;
+
+            if (idStr != null && !idStr.isEmpty()) {
+                int id = Integer.parseInt(idStr);
+
+                Optional<Apresentacao> apresentacaoOpt = agendaDAO.buscarPorId(id);
+
+                if (apresentacaoOpt.isPresent()) {
+                    apresentacoesJson = gson.toJson(new Apresentacao[]{apresentacaoOpt.get()});
+                } else {
+                    apresentacoesJson = "[]";
+                }
+
+            } else {
+                List<Apresentacao> apresentacoes = agendaDAO.listarTodos();
+                apresentacoesJson = gson.toJson(apresentacoes);
+            }
+
+            response.getWriter().write(apresentacoesJson);
+
+        } catch (NumberFormatException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write(gson.toJson(new ErrorResponse("ID inválido para busca.")));
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write(gson.toJson(new ErrorResponse("Erro ao listar agenda: " + e.getMessage())));
+            response.getWriter().write(gson.toJson(new ErrorResponse("Erro ao buscar agenda: " + e.getMessage())));
         }
     }
 
@@ -54,8 +78,6 @@ public class AgendaAPIServlet extends HttpServlet {
             String jsonRequest = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
 
             Apresentacao novaApresentacao = gson.fromJson(jsonRequest, Apresentacao.class);
-
-            // FUTURAMENTE: Inserir a lógica de CoristaService aqui para validar o agendamento
 
             agendaDAO.inserir(novaApresentacao);
 
@@ -106,7 +128,7 @@ public class AgendaAPIServlet extends HttpServlet {
         String idStr = request.getParameter("id");
 
         if (idStr == null || idStr.isEmpty()) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST); // 400
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write(gson.toJson(new ErrorResponse("ID da apresentação ausente.")));
             return;
         }

@@ -147,7 +147,7 @@
 
     function deletarCorista(id, nome) {
         if (!confirm(`Tem certeza que deseja excluir o corista ${nome} (ID: ${id})?`)) {
-            return; // Usuário cancelou
+            return;
         }
 
         fetch(`api/coristas?id=${id}`, {

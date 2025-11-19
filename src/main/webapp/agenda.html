@@ -168,7 +168,7 @@
 
             if (response.status === 204) {
                 alert(`✅ Apresentação ID ${id} excluída com sucesso!`);
-                carregarAgenda(); // Recarrega a lista
+                carregarAgenda();
             } else if (response.status === 404) {
                  alert('❌ Erro: Apresentação não encontrada.');
             } else {

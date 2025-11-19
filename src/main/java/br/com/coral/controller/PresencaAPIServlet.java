@@ -42,7 +42,7 @@ public class PresencaAPIServlet extends HttpServlet {
             response.getWriter().write(gson.toJson(new ValidationResponse(status, apto, coristaId)));
 
         } catch (IllegalArgumentException e) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND); // 404
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             response.getWriter().write(gson.toJson(new ErrorResponse(e.getMessage())));
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

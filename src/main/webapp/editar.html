@@ -57,14 +57,14 @@
     });
 
     function carregarDadosCorista(id) {
-        fetch(`${API_URL}?id=${id}`) // Reutiliza o endpoint GET /api/coristas
+        fetch(`${API_URL}?id=${id}`)
             .then(response => {
                 if (!response.ok) throw new Error('Falha ao buscar corista.');
                 return response.json();
             })
             .then(data => {
                 if (data.length === 0) throw new Error('Corista não encontrado.');
-                const corista = data[0]; // Assume que o primeiro elemento é o correto
+                const corista = data[0];
 
                 document.getElementById('id').value = corista.id;
                 document.getElementById('nome').value = corista.nome;
@@ -91,7 +91,7 @@
             faltasNosUltimosDoisEnsaios: parseInt(form.faltasNosUltimosDoisEnsaios.value)
         };
 
-        fetch(API_URL, { // Endpoint PUT para /api/coristas
+        fetch(API_URL, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(coristaData)

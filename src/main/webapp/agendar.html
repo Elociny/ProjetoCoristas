@@ -46,17 +46,16 @@
 
         const eventoData = {
             titulo: form.titulo.value,
-            // O valor de datetime-local é uma string compatível com LocalDateTime em Java
             dataHora: form.dataHora.value,
             local: form.local.value
         };
 
         fetch('api/agenda', {
-            method: 'POST', // Chama o doPost() do AgendaAPIServlet
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(eventoData) // Envia o JSON
+            body: JSON.stringify(eventoData)
         })
         .then(response => {
             if (response.ok || response.status === 201) {

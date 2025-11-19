@@ -92,7 +92,6 @@
             body: JSON.stringify(eventoData)
         })
         .then(response => {
-            // if (verificarLogin(response)) throw new Error('Auth failed');
             if (response.ok) {
                 return response.json();
             } else {

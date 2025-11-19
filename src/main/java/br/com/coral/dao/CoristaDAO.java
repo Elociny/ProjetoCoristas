@@ -6,7 +6,7 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
 import java.util.List;
-import java.util.Optional; // Usado para buscarPorId
+import java.util.Optional;
 
 public class CoristaDAO {
 
