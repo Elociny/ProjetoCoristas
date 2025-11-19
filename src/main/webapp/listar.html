@@ -26,6 +26,7 @@
         a {
             color: #5C007C;
             text-decoration: none;
+            margin-right: 15px;
         }
         a:hover {
             text-decoration: underline;
@@ -55,9 +56,15 @@
 </head>
 <body>
 <div class="container">
-    <h2>👥 Coristas Cadastrados</h2>
-    <p><a href="cadastrar.html">➕ Cadastrar Novo Corista</a></p>
+    <h2>👥 Gerenciamento de Coristas</h2>
 
+    <p style="margin-bottom: 20px;">
+        <a href="cadastrar.html">➕ Cadastrar Novo Corista</a>
+        |
+        <a href="agenda.html">📅 Agenda de Eventos</a>
+        |
+        <a href="validarPresenca.html">✅ Validar Presença</a>
+    </p>
     <table id="tabela-coristas">
         <thead>
         <tr>
@@ -76,6 +83,15 @@
 </div>
 
 <script>
+    function verificarLogin(response) {
+        if (response.status === 401) {
+            alert("Sua sessão expirou ou o acesso é negado. Faça login novamente.");
+            window.location.href = 'index.html';
+            return true;
+        }
+        return false;
+    }
+
     document.addEventListener('DOMContentLoaded', carregarCoristas);
 
     function carregarCoristas() {
@@ -86,6 +102,10 @@
 
         fetch('api/coristas')
             .then(response => {
+                if (verificarLogin(response)) {
+                    return;
+                }
+
                 if (!response.ok) {
                     throw new Error('Erro ao carregar lista. Status: ' + response.status);
                 }
@@ -114,7 +134,6 @@
                         <td>${corista.faltasNosUltimosDoisEnsaios}</td>
                         <td>
                             <a href="editar.html?id=${corista.id}">Editar</a> |
-
                             <a href="#" onclick="deletarCorista(${corista.id}, '${corista.nome}')">Excluir</a>
                         </td>
                     `;
@@ -135,6 +154,10 @@
             method: 'DELETE'
         })
         .then(response => {
+            if (verificarLogin(response)) {
+                return;
+            }
+
             if (response.status === 204) {
                 alert(`✅ Corista ID ${id} excluído com sucesso!`);
                 carregarCoristas();
