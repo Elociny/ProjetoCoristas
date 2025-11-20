@@ -97,3 +97,21 @@ No seu arquivo `src/main/resources/META-INF/persistence.xml`, verifique e ajuste
 ```xml
 <property name="jakarta.persistence.jdbc.user" value="root" />
 <property name="jakarta.persistence.jdbc.password" value="SUA_SENHA" />
+```
+
+---
+
+## 👨‍💻 Desenvolvedores (Autores)
+
+A tabela abaixo detalha as principais responsabilidades de cada membro da equipe na construção da arquitetura em camadas do sistema Coristas:
+
+| Desenvolvedor | Função Principal | Contribuição Específica | Perfil GitHub |
+| :--- | :--- | :--- | :--- |
+| **Ana Paula** | **Persistência / Banco de Dados** | Criação do Schema MySQL (`crud_java`), Configuração do JPA/Hibernate e Desenvolvimento dos **DAOs**. | [GitHub](https://github.com/AnaPaula2024) |
+| **Melvin** | **Back-end Principal** | Desenvolvimento dos **Servlets API**, Lógica JSON/Gson e Modelagem da Arquitetura RESTful. | [GitHub](https://github.com/MelvinGomes) |
+| **Miguel Luiz** | **Front-end / Desenvolvimento** | Desenvolvimento de páginas web (`cadastrar.html`, `editar.html`), Layout HTML/CSS e Implementação da lógica **Fetch API**. | [GitHub](https://github.com/limmuz) |
+| **Nicole** | **Front-end / UI/UX** | Design e Estilização (`CSS`), Desenvolvimento da página **`listar.html`** (Dashboard) e Lógica de **Login/Segurança** (*Client-Side*). | [GitHub](https://github.com/Elociny/) |
+| **Tayna** | **Front-end / Lógica JS** | Desenvolvimento da página **`agenda.html`**, Implementação das funções de **CRUD** no JavaScript (Deleção e Edição), e Validação *Client-Side*. | [GitHub](https://github.com/taynaaraujobispo) |
+| **Vinicius** | **Integração / Configuração** | Configuração do ambiente (Tomcat, Maven, IntelliJ), Implementação da **Camada de Serviço** (`CoristaService`) e Integração das **Regras de Negócio (RNs)**. | [GitHub](https://github.com/ViniAvarelo) |
+
+
