@@ -107,12 +107,10 @@ A tabela abaixo detalha as principais responsabilidades de cada membro da equipe
 
 | Desenvolvedor | Função Principal | Contribuição Específica | Perfil GitHub |
 | :--- | :--- | :--- | :--- |
-| **Ana Paula** | **Persistência / Banco de Dados** | Criação do Schema MySQL (`crud_java`), Configuração do JPA/Hibernate e Desenvolvimento dos **DAOs**. | [GitHub](https://github.com/AnaPaula2024) |
-| **Cíntia** | **Integração / Configuração** | Colaboração na Configuração do ambiente e Integração dos módulos do Front-end com o Back-end. | [GitHub](https://github.com/cintiacarvv) |
-| **Melvin** | **Back-end Principal** | Desenvolvimento dos **Servlets API**, Lógica JSON/Gson e Modelagem da Arquitetura RESTful. | [GitHub](https://github.com/MelvinGomes) |
-| **Miguel Luiz** | **Front-end / Desenvolvimento** | Desenvolvimento de páginas web (`cadastrar.html`, `editar.html`), Layout HTML/CSS e Implementação da lógica **Fetch API**. | [GitHub](https://github.com/limmuz) |
-| **Nicole** | **Front-end / UI/UX** | Design e Estilização (`CSS`), Desenvolvimento da página **`listar.html`** (Dashboard) e Lógica de **Login/Segurança** (*Client-Side*). | [GitHub](https://github.com/Elociny/) |
-| **Tayna** | **Front-end / Lógica JS** | Desenvolvimento da página **`agenda.html`**, Implementação das funções de **CRUD** no JavaScript (Deleção e Edição), e Validação *Client-Side*. | [GitHub](https://github.com/taynaaraujobispo) |
-| **Vinicius** | **Integração / Configuração** | Configuração do ambiente (Tomcat, Maven, IntelliJ), Implementação da **Camada de Serviço** (`CoristaService`). | [GitHub](https://github.com/ViniAvarelo) |
-
-
+| **Ana Paula Pereira Viana** | **Persistência / Banco de Dados** | Criação do Schema MySQL (`crud_java`), Configuração do JPA/Hibernate e Desenvolvimento dos **DAOs**. | [GitHub](https://github.com/AnaPaula2024) |
+| **Cintia Carvalho** | **Integração / Configuração** | Colaboração na Configuração do ambiente e Integração dos módulos do Front-end com o Back-end. | [GitHub](https://github.com/cintiacarvv) |
+| **Melvin Expedito Gomes Felix** | **Back-end Principal** | Desenvolvimento dos **Servlets API**, Lógica JSON/Gson e Modelagem da Arquitetura RESTful. | [GitHub](https://github.com/MelvinGomes) |
+| **Miguel Luiz Lima Nascimento** | **Front-end / Desenvolvimento** | Desenvolvimento de páginas web (`cadastrar.html`, `editar.html`), Layout HTML/CSS e Implementação da lógica **Fetch API**. | [GitHub](https://github.com/limmuz) |
+| **Nicole Lins Coelho** | **Front-end / UI/UX** | Design e Estilização (`CSS`), Desenvolvimento da página **`listar.html`** (Dashboard) e Lógica de **Login/Segurança** (*Client-Side*). | [GitHub](https://github.com/Elociny/) |
+| **Tayna Araújo Bispo** | **Front-end / Lógica JS** | Desenvolvimento da página **`agenda.html`**, Implementação das funções de **CRUD** no JavaScript (Deleção e Edição), e Validação *Client-Side*. | [GitHub](https://github.com/taynaaraujobispo) |
+| **Vinicius Avarelo** | **Integração / Configuração** | Configuração do ambiente (Tomcat, Maven, IntelliJ), Implementação da **Camada de Serviço** (`CoristaService`). | [GitHub](https://github.com/ViniAvarelo) |
